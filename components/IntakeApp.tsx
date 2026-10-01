@@ -91,7 +91,8 @@ export default function IntakeApp() {
         body:JSON.stringify({data:nextData})
       });
       if(!res.ok) throw new Error("email failed");
-      setEmailState("sent");
+      const result=await res.json();
+      setEmailState(result.email_sent ? "sent" : "unavailable");
     } catch {
       setEmailState("unavailable");
     }
