@@ -1,9 +1,8 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Car } from "iconoir-react";
 import { Button } from "@/components/atoms/Button";
-import { StatusPill } from "@/components/atoms/StatusPill";
 import ChatComposer, { type ChatThreadMessage } from "@/components/primitives/ChatComposer";
 import DiagnosticAttachments, { type DiagnosticAttachment } from "@/components/primitives/DiagnosticAttachments";
 import { ThemeToggle } from "@/components/site/ThemeToggle";
@@ -63,7 +62,6 @@ export default function IntakeApp() {
   const nextId=useRef(2);
 
   const currentStep=order[stepIndex];
-  const progress=useMemo(()=>`${Math.min(stepIndex+1,order.length)} / ${order.length}`,[stepIndex]);
 
   async function finish(nextData:IntakeData) {
     setComplete(true);
@@ -173,15 +171,6 @@ export default function IntakeApp() {
       </header>
 
       <section className="mx-auto flex h-[calc(100dvh-64px)] max-w-[1280px] flex-col overflow-hidden px-4 py-5 sm:px-6 sm:py-6">
-        <div className="mb-4 flex w-full shrink-0 items-center justify-between">
-          <div>
-            <StatusPill tone={complete ? "green" : "accent"}>{complete ? "Intake complete" : "AI intake"}</StatusPill>
-            <h1 className="mt-3 text-[24px] font-semibold tracking-[-.025em]">Tell us what’s going on.</h1>
-            <p className="mt-1 text-[13px] text-ink-2">One question at a time. Add photos or documents when they help explain the issue.</p>
-          </div>
-          {!complete && <span className="font-mono text-[12px] text-ink-3">{progress}</span>}
-        </div>
-
         <input
           ref={fileInputRef}
           className="hidden"
