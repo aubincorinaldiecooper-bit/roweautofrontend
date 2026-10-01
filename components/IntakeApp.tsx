@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, ReactNode, useEffect, useMemo, useState } from "react";
+import { FormEvent, ReactNode, useMemo, useState } from "react";
 import { ArrowRight, Car, Check, CheckCircle, ClipboardCheck, Plus, ShieldCheck, Trash, User, WarningTriangle } from "iconoir-react";
 import { Button } from "@/components/atoms/Button";
 import { SegmentedControl } from "@/components/atoms/SegmentedControl";
@@ -32,69 +32,6 @@ function Brand() {
   </a>;
 }
 
-function Hero({onStart}:{onStart:()=>void}) {
-  const homeHref = process.env.NODE_ENV === "production" ? "/roweautofrontend/" : "/";
-  return <section id="home" className="relative flex min-h-[720px] w-full items-end overflow-hidden bg-ink text-white sm:min-h-[760px]">
-    <div
-      className="absolute inset-0 bg-cover"
-      style={{
-        backgroundImage:"url(https://images.unsplash.com/photo-1643700973089-baa86a1ab9ee?auto=format&fit=crop&fm=jpg&q=86&w=2400)",
-        backgroundPosition:"center 45%"
-      }}
-    />
-    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-black/35"/>
-
-    <div className="absolute inset-x-0 top-0 z-10">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-6 sm:px-6">
-        <a href={homeHref} aria-label="First Rowe Auto home" className="flex items-center gap-2.5 rounded-control outline-none focus-visible:ring-2 focus-visible:ring-white/70">
-          <span className="flex size-9 items-center justify-center rounded-control bg-white/95 text-black shadow-btn"><Car width={19}/></span>
-          <div>
-            <div className="text-[13px] font-semibold leading-4 text-white">FIRST ROWE AUTO</div>
-            <div className="text-[11px] text-white/70">Repairs & Sales</div>
-          </div>
-        </a>
-        <div className="hidden text-right text-[12px] leading-5 text-white/70 sm:block">
-          <div>Hollywood, Florida</div>
-          <div>954-374-8384</div>
-        </div>
-      </div>
-    </div>
-
-    <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-10 sm:px-6 sm:pb-14 md:pb-16">
-      <div className="grid gap-8 md:grid-cols-[minmax(0,1fr)_320px] md:items-end md:gap-12">
-        <div className="max-w-3xl">
-          <div className="mb-4 text-[12px] font-medium uppercase tracking-[.12em] text-white/65">Repair · maintenance · vehicle sales</div>
-          <h1 className="text-[42px] font-semibold leading-[.98] tracking-[-.045em] text-white sm:text-[58px] md:text-[72px]">Straight answers for your car.</h1>
-          <p className="mt-5 max-w-2xl text-[16px] leading-7 text-white/80 sm:text-[18px]">Tell us what you need before you arrive. We’ll keep the details clear from drop-off and approval through pickup—or help you get started on your next vehicle.</p>
-        </div>
-
-        <div className="rounded-window bg-surface/95 p-5 text-ink shadow-raised backdrop-blur">
-          <div className="mb-4">
-            <div className="text-[11px] font-medium uppercase tracking-[.08em] text-ink-3">Plan your visit</div>
-            <div className="mt-1 text-[16px] font-semibold">First Rowe Auto</div>
-          </div>
-          <div className="grid gap-3 border-y border-line py-4 text-[13px]">
-            <div>
-              <div className="text-[11px] text-ink-3">Address</div>
-              <div className="mt-0.5 font-medium">5821 Rodman St, Hollywood, FL</div>
-            </div>
-            <div>
-              <div className="text-[11px] text-ink-3">Hours</div>
-              <div className="mt-0.5 font-medium">Mon–Fri 9–6 · Sat 9–1</div>
-            </div>
-            <div>
-              <div className="text-[11px] text-ink-3">Phone</div>
-              <div className="mt-0.5 font-medium">954-374-8384</div>
-            </div>
-          </div>
-          <Button variant="primary" size="md" onClick={onStart} className="group mt-5 w-full">
-            Start an intake <ArrowRight width={16} className="transition-transform duration-150 group-hover:translate-x-0.5"/>
-          </Button>
-        </div>
-      </div>
-    </div>
-  </section>;
-}
 function Field({label,required,children,hint}:{label:string;required?:boolean;children:ReactNode;hint?:string}) {
   return <label className="block min-w-0"><span className="mb-1.5 flex items-center gap-1 text-[12px] font-medium text-ink-2">{label}{required&&<span className="text-accent">*</span>}</span>{children}{hint&&<span className="mt-1 block text-[11px] text-ink-3">{hint}</span>}</label>;
 }
@@ -147,9 +84,8 @@ export default function IntakeApp() {
   const toggleService=(s:string)=>set("serviceRequested",data.serviceRequested.includes(s)?data.serviceRequested.filter(x=>x!==s):[...data.serviceRequested,s]);
 
   return <main className="min-h-screen bg-page text-ink">
-    <Hero onStart={()=>document.getElementById("intake")?.scrollIntoView({behavior:"smooth",block:"start"})}/>
     <header className="sticky top-0 z-30 border-b border-line bg-page/95 backdrop-blur"><div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6"><Brand/><div className="flex items-center gap-3"><button className="hidden text-[12px] text-ink-3 hover:text-ink sm:block" onClick={()=>setShowWhy(true)}>Why this intake?</button><ThemeToggle/></div></div></header>
-    <form id="intake" onSubmit={submit} className="mx-auto max-w-6xl scroll-mt-16 px-4 py-6 sm:px-6 sm:py-8">
+    <form onSubmit={submit} className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div><div className="mb-2 text-[12px] font-medium text-ink-3">NEW INTAKE</div><h1 className="text-[27px] font-semibold tracking-[-.03em]">What are we helping with?</h1><p className="mt-1 text-[13px] text-ink-2">Choose a lane. Only relevant fields appear.</p></div>
         <SegmentedControl options={["Repair","Vehicle sale"] as const} value={mode} onChange={v=>{setMode(v);setStep(1)}} className="w-full sm:w-[260px]"/>
