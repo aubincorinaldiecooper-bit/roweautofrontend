@@ -33,26 +33,61 @@ function Brand() {
 }
 
 function Hero({onStart}:{onStart:()=>void}) {
-  return <section id="home" className="relative flex min-h-[88vh] w-full items-end overflow-hidden bg-ink text-white">
+  const homeHref = process.env.NODE_ENV === "production" ? "/roweautofrontend/" : "/";
+  return <section id="home" className="relative flex min-h-[720px] w-full items-end overflow-hidden bg-ink text-white sm:min-h-[760px]">
     <div
-      className="absolute inset-0 bg-cover bg-center"
-      style={{backgroundImage:"url(https://res.cloudinary.com/dvwtcsh5v/image/upload/v1770400411/img_14002.jpg)",backgroundPosition:"bottom"}}
+      className="absolute inset-0 bg-cover"
+      style={{
+        backgroundImage:"url(https://images.unsplash.com/photo-1643700973089-baa86a1ab9ee?auto=format&fit=crop&fm=jpg&q=86&w=2400)",
+        backgroundPosition:"center 45%"
+      }}
     />
-    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-black/10"/>
-    <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-12 pt-28 sm:px-6 sm:pb-16 md:pb-20">
-      <div className="flex flex-col gap-10 md:flex-row md:items-end md:justify-between">
-        <div className="max-w-3xl">
-          <div className="mb-4 text-[12px] font-medium uppercase tracking-[.12em] text-white/70">First Rowe Auto · Hollywood, Florida</div>
-          <h1 className="max-w-3xl text-[42px] font-semibold leading-[.98] tracking-[-.045em] text-white sm:text-[58px] md:text-[76px]">Repair, sales, and service without the runaround.</h1>
-          <p className="mt-5 max-w-2xl text-[16px] leading-7 text-white/85 sm:text-[18px]">Tell us what your vehicle needs before you arrive. We’ll keep the important details clear from intake through pickup—or help you get started on your next vehicle.</p>
-        </div>
-        <div className="shrink-0 md:max-w-[260px]">
-          <div className="mb-5 text-[13px] leading-6 text-white/75">
-            <div>5821 Rodman St, Hollywood, FL</div>
-            <div>Mon–Fri 9–6 · Sat 9–1</div>
-            <div>954-374-8384</div>
+    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-black/35"/>
+
+    <div className="absolute inset-x-0 top-0 z-10">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-6 sm:px-6">
+        <a href={homeHref} aria-label="First Rowe Auto home" className="flex items-center gap-2.5 rounded-control outline-none focus-visible:ring-2 focus-visible:ring-white/70">
+          <span className="flex size-9 items-center justify-center rounded-control bg-white/95 text-black shadow-btn"><Car width={19}/></span>
+          <div>
+            <div className="text-[13px] font-semibold leading-4 text-white">FIRST ROWE AUTO</div>
+            <div className="text-[11px] text-white/70">Repairs & Sales</div>
           </div>
-          <Button variant="accent" size="md" onClick={onStart} className="group">
+        </a>
+        <div className="hidden text-right text-[12px] leading-5 text-white/70 sm:block">
+          <div>Hollywood, Florida</div>
+          <div>954-374-8384</div>
+        </div>
+      </div>
+    </div>
+
+    <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-10 sm:px-6 sm:pb-14 md:pb-16">
+      <div className="grid gap-8 md:grid-cols-[minmax(0,1fr)_320px] md:items-end md:gap-12">
+        <div className="max-w-3xl">
+          <div className="mb-4 text-[12px] font-medium uppercase tracking-[.12em] text-white/65">Repair · maintenance · vehicle sales</div>
+          <h1 className="text-[42px] font-semibold leading-[.98] tracking-[-.045em] text-white sm:text-[58px] md:text-[72px]">Straight answers for your car.</h1>
+          <p className="mt-5 max-w-2xl text-[16px] leading-7 text-white/80 sm:text-[18px]">Tell us what you need before you arrive. We’ll keep the details clear from drop-off and approval through pickup—or help you get started on your next vehicle.</p>
+        </div>
+
+        <div className="rounded-window bg-surface/95 p-5 text-ink shadow-raised backdrop-blur">
+          <div className="mb-4">
+            <div className="text-[11px] font-medium uppercase tracking-[.08em] text-ink-3">Plan your visit</div>
+            <div className="mt-1 text-[16px] font-semibold">First Rowe Auto</div>
+          </div>
+          <div className="grid gap-3 border-y border-line py-4 text-[13px]">
+            <div>
+              <div className="text-[11px] text-ink-3">Address</div>
+              <div className="mt-0.5 font-medium">5821 Rodman St, Hollywood, FL</div>
+            </div>
+            <div>
+              <div className="text-[11px] text-ink-3">Hours</div>
+              <div className="mt-0.5 font-medium">Mon–Fri 9–6 · Sat 9–1</div>
+            </div>
+            <div>
+              <div className="text-[11px] text-ink-3">Phone</div>
+              <div className="mt-0.5 font-medium">954-374-8384</div>
+            </div>
+          </div>
+          <Button variant="primary" size="md" onClick={onStart} className="group mt-5 w-full">
             Start an intake <ArrowRight width={16} className="transition-transform duration-150 group-hover:translate-x-0.5"/>
           </Button>
         </div>
