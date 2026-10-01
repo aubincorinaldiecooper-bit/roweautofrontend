@@ -44,19 +44,14 @@ export default function ChatComposer({
   labels,
   onSend,
   disabled = false,
-  suggestions = ["Diagnostic intake", "Estimate follows"],
-  onAttach,
 }: {
   messages: ChatThreadMessage[];
   labels?: Partial<ChatComposerLabels>;
   onSend?: (text: string) => void;
   disabled?: boolean;
-  suggestions?: string[];
-  onAttach?: () => void;
 }) {
   const l = { ...DEFAULT_LABELS, ...labels };
   const [draft, setDraft] = useState("");
-  const [tab, setTab] = useState(suggestions[0] ?? "");
   const inputRef = useRef<HTMLInputElement>(null);
   const canSend = draft.trim().length > 0 && !disabled;
 
@@ -69,34 +64,6 @@ export default function ChatComposer({
 
   return (
     <div className="flex h-full min-h-0 w-full flex-col self-start overflow-hidden rounded-[14px] bg-surface shadow-card">
-      <div className="flex shrink-0 items-center justify-between border-b border-line p-1.5">
-        <div className="flex items-center">
-          {suggestions.map((item) => (
-            <button
-              key={item}
-              type="button"
-              aria-pressed={tab === item}
-              onClick={() => setTab(item)}
-              className={`rounded-[6px] px-2 py-[3px] text-[13px] text-ink transition-[background-color,opacity] duration-100 ${tab === item ? "bg-field" : "opacity-50 hover:opacity-75"}`}
-            >
-              {item}
-            </button>
-          ))}
-        </div>
-        <div className="flex items-center gap-1">
-          <button
-            type="button"
-            aria-label="Add diagnostic attachment"
-            onClick={onAttach}
-            className="flex size-6 items-center justify-center rounded-[6px] text-ink-3 transition-colors duration-100 hover:bg-hover hover:text-ink-2"
-          >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M12 5v14M5 12h14" />
-            </svg>
-          </button>
-        </div>
-      </div>
-
       <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-3 pt-3 pb-2">
         {messages.map((message) =>
           message.role === "user" ? (
