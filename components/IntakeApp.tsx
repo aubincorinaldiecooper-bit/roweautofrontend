@@ -141,8 +141,8 @@ export default function IntakeApp() {
         </div>
       </header>
 
-      <section className="mx-auto flex max-w-5xl flex-col items-center px-4 py-8 sm:px-6 sm:py-12">
-        <div className="mb-5 flex w-full max-w-[680px] items-center justify-between">
+      <section className="mx-auto flex h-[calc(100dvh-64px)] max-w-5xl flex-col items-center overflow-hidden px-4 py-5 sm:px-6 sm:py-6">
+        <div className="mb-4 flex w-full max-w-[680px] shrink-0 items-center justify-between">
           <div>
             <StatusPill tone={complete ? "green" : "accent"}>{complete ? "Intake complete" : "AI intake"}</StatusPill>
             <h1 className="mt-3 text-[24px] font-semibold tracking-[-.025em]">Tell us what’s going on.</h1>
@@ -151,15 +151,17 @@ export default function IntakeApp() {
           {!complete && <span className="font-mono text-[12px] text-ink-3">{progress}</span>}
         </div>
 
-        <ChatComposer
-          messages={messages}
-          labels={{placeholder:"Type your answer…"}}
-          onSend={send}
-          disabled={complete}
-        />
+        <div className="min-h-0 w-full max-w-[680px] flex-1">
+          <ChatComposer
+            messages={messages}
+            labels={{placeholder:"Type your answer…"}}
+            onSend={send}
+            disabled={complete}
+          />
+        </div>
 
         {complete && (
-          <div className="mt-5 flex w-full max-w-[680px] items-center justify-between gap-4">
+          <div className="mt-3 flex w-full max-w-[680px] shrink-0 items-center justify-between gap-4">
             <div className="text-[12px] text-ink-2">
               {emailState==="sent"
                 ? "Confirmation email sent. We’ll follow up with the estimate shortly."
