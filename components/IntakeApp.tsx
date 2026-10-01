@@ -5,6 +5,7 @@ import { Car } from "iconoir-react";
 import { Button } from "@/components/atoms/Button";
 import { StatusPill } from "@/components/atoms/StatusPill";
 import ChatComposer, { type ChatThreadMessage } from "@/components/primitives/ChatComposer";
+import DiagnosticAttachments, { type DiagnosticAttachment } from "@/components/primitives/DiagnosticAttachments";
 import { ThemeToggle } from "@/components/site/ThemeToggle";
 
 type IntakeData = {
@@ -57,6 +58,8 @@ export default function IntakeApp() {
   ]);
   const [complete,setComplete]=useState(false);
   const [emailState,setEmailState]=useState<"idle"|"sending"|"sent"|"unavailable">("idle");
+  const [attachments,setAttachments]=useState<DiagnosticAttachment[]>([]);
+  const fileInputRef=useRef<HTMLInputElement>(null);
   const nextId=useRef(2);
 
   const currentStep=order[stepIndex];
@@ -84,7 +87,10 @@ export default function IntakeApp() {
       const res=await fetch(`${api}/api/intake-chat/complete`,{
         method:"POST",
         headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({data:nextData})
+        body:JSON.stringify({
+          data:nextData,
+          attachments:attachments.map(({name,type,size})=>({name,type,size}))
+        })
       });
       if(!res.ok) throw new Error("send failed");
       const result=await res.json();
@@ -123,12 +129,37 @@ export default function IntakeApp() {
     },180);
   }
 
+  function addFiles(files:FileList) {
+    Array.from(files).forEach((file,index)=>{
+      const base:DiagnosticAttachment={
+        id:`${Date.now()}-${index}-${file.name}`,
+        name:file.name,
+        type:file.type || "application/octet-stream",
+        size:file.size,
+      };
+
+      if(file.type.startsWith("image/")){
+        const reader=new FileReader();
+        reader.onload=()=>{
+          setAttachments(current=>[
+            ...current,
+            {...base,preview:typeof reader.result==="string" ? reader.result : undefined}
+          ]);
+        };
+        reader.readAsDataURL(file);
+      }else{
+        setAttachments(current=>[...current,base]);
+      }
+    });
+  }
+
   function reset() {
     setStepIndex(0);
     setData(emptyData);
     setMessages([{id:1,role:"assistant",text:questions.name}]);
     setComplete(false);
     setEmailState("idle");
+    setAttachments([]);
     nextId.current=2;
   }
 
@@ -141,37 +172,62 @@ export default function IntakeApp() {
         </div>
       </header>
 
-      <section className="mx-auto flex h-[calc(100dvh-64px)] max-w-5xl flex-col items-center overflow-hidden px-4 py-5 sm:px-6 sm:py-6">
-        <div className="mb-4 flex w-full max-w-[680px] shrink-0 items-center justify-between">
+      <section className="mx-auto flex h-[calc(100dvh-64px)] max-w-[1280px] flex-col overflow-hidden px-4 py-5 sm:px-6 sm:py-6">
+        <div className="mb-4 flex w-full shrink-0 items-center justify-between">
           <div>
             <StatusPill tone={complete ? "green" : "accent"}>{complete ? "Intake complete" : "AI intake"}</StatusPill>
             <h1 className="mt-3 text-[24px] font-semibold tracking-[-.025em]">Tell us what’s going on.</h1>
-            <p className="mt-1 text-[13px] text-ink-2">One question at a time. We’ll use this to prepare the next step.</p>
+            <p className="mt-1 text-[13px] text-ink-2">One question at a time. Add photos or documents when they help explain the issue.</p>
           </div>
           {!complete && <span className="font-mono text-[12px] text-ink-3">{progress}</span>}
         </div>
 
-        <div className="min-h-0 w-full max-w-[680px] flex-1">
-          <ChatComposer
-            messages={messages}
-            labels={{placeholder:"Type your answer…"}}
-            onSend={send}
-            disabled={complete}
-          />
-        </div>
+        <input
+          ref={fileInputRef}
+          className="hidden"
+          type="file"
+          multiple
+          accept="image/*,.pdf,.txt,.doc,.docx"
+          onChange={(event)=>{
+            if(event.target.files?.length) addFiles(event.target.files);
+            event.currentTarget.value="";
+          }}
+        />
 
-        {complete && (
-          <div className="mt-3 flex w-full max-w-[680px] shrink-0 items-center justify-between gap-4">
-            <div className="text-[12px] text-ink-2">
-              {emailState==="sent"
-                ? "Confirmation email sent. We’ll follow up with the estimate shortly."
-                : emailState==="sending"
-                  ? "Sending confirmation email…"
-                  : "We’ll follow up with the estimate shortly."}
+        <div className="grid min-h-0 w-full flex-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
+          <div className="flex min-h-0 min-w-0 flex-col">
+            <div className="min-h-0 flex-1">
+              <ChatComposer
+                messages={messages}
+                labels={{placeholder:"Type your answer…"}}
+                onSend={send}
+                onAttach={()=>fileInputRef.current?.click()}
+                disabled={complete}
+              />
             </div>
-            <Button variant="secondary" size="sm" onClick={reset}>Start another intake</Button>
+
+            {complete && (
+              <div className="mt-3 flex shrink-0 items-center justify-between gap-4">
+                <div className="text-[12px] text-ink-2">
+                  {emailState==="sent"
+                    ? "Confirmation email sent. We’ll follow up with the estimate shortly."
+                    : emailState==="sending"
+                      ? "Sending confirmation email…"
+                      : "We’ll follow up with the estimate shortly."}
+                </div>
+                <Button variant="secondary" size="sm" onClick={reset}>Start another intake</Button>
+              </div>
+            )}
           </div>
-        )}
+
+          <div className="hidden min-h-0 lg:block">
+            <DiagnosticAttachments
+              files={attachments}
+              onRequestAdd={()=>fileInputRef.current?.click()}
+              onRemove={(id)=>setAttachments(current=>current.filter(file=>file.id!==id))}
+            />
+          </div>
+        </div>
       </section>
     </main>
   );
