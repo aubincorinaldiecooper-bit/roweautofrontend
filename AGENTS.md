@@ -24,4 +24,5 @@ Pinned reference:
 - Home status labels: Beautiful UI StatusPill
 - Theme control: Beautiful UI ThemeToggle
 - Intake conversation: Beautiful UI ChatComposer adaptation
+- Diagnostic attachments: Beautiful UI ContextCards adaptation
 - Intake completion action: Beautiful UI Button
