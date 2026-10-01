@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, ReactNode, useEffect, useMemo, useState } from "react";
-import { ArrowRight, Car, Check, CheckCircle, ClipboardCheck, Plus, Repair, SaleTag, ShieldCheck, Trash, User, WarningTriangle } from "iconoir-react";
+import { ArrowRight, Car, Check, CheckCircle, ClipboardCheck, Plus, ShieldCheck, Trash, User, WarningTriangle } from "iconoir-react";
 import { Button } from "@/components/atoms/Button";
 import { SegmentedControl } from "@/components/atoms/SegmentedControl";
 import { Switch } from "@/components/atoms/Switch";
@@ -118,7 +118,7 @@ export default function IntakeApp() {
               <div className="sm:col-span-2 lg:col-span-4"><Field label="VIN — 17 characters" required><input className={fieldClass+" font-mono uppercase"} maxLength={17} value={data.vin} onChange={e=>set("vin",e.target.value.toUpperCase().replace(/[^A-HJ-NPR-Z0-9]/g,""))}/></Field><div className="mt-1 text-right font-mono text-[11px] text-ink-3">{data.vin.length}/17</div></div>
             </div>
           </Section>
-          <Section number="3" title="Reason for visit" icon={<Repair width={17}/>}>
+          <Section number="3" title="Reason for visit" icon={<ClipboardCheck width={17}/>}>
             <div className="mb-4"><div className="mb-2 text-[12px] font-medium text-ink-2">Service requested</div><div className="flex flex-wrap gap-2">{services.map(s=><button key={s} type="button" onClick={()=>toggleService(s)} className={`rounded-full px-3 py-1.5 text-[12px] shadow-hairline ${data.serviceRequested.includes(s)?"bg-accent-tint text-accent-ink":"bg-surface text-ink-2 hover:bg-hover"}`}>{data.serviceRequested.includes(s)&&<Check width={13} className="mr-1 inline"/>}{s}</button>)}</div></div>
             <Field label="Customer concern — what, when it happens, how long" required><textarea className={areaClass} value={data.concern} onChange={e=>set("concern",e.target.value)} placeholder="Use the customer's own words…"/></Field>
             <div className="mt-4 grid gap-4 sm:grid-cols-2"><Field label="Authorized diagnosis up to $"><input className={fieldClass} value={data.diagnosticLimit} onChange={e=>set("diagnosticLimit",e.target.value)}/></Field><Field label="Promised time / date"><input className={fieldClass} type="datetime-local" value={data.promisedAt} onChange={e=>set("promisedAt",e.target.value)}/></Field></div>
@@ -151,7 +151,7 @@ export default function IntakeApp() {
           <div className="flex justify-between"><Button type="button" variant="quiet" onClick={()=>setStep(2)}>Back</Button><Button type="submit" variant="success" disabled={status==="sending"}>{status==="sending"?"Saving…":"Save repair intake"} <Check width={16}/></Button></div>
         </div>}
       </> : <div className="grid gap-4 lg:grid-cols-2">
-        <Section number="1" title="Customer & sales intent" icon={<SaleTag width={17}/>}>
+        <Section number="1" title="Customer & sales intent" icon={<Car width={17}/>}>
           <div className="grid gap-4 sm:grid-cols-2"><Field label="Name" required><input className={fieldClass} value={data.name} onChange={e=>set("name",e.target.value)}/></Field><Field label="Mobile phone" required><input className={fieldClass} value={data.phone} onChange={e=>set("phone",e.target.value)}/></Field><Field label="Email" required><input className={fieldClass} type="email" value={data.email} onChange={e=>set("email",e.target.value)}/></Field><Field label="Intent"><select className={fieldClass} value={data.salesIntent} onChange={e=>set("salesIntent",e.target.value)}>{["Buy","Sell / trade","Browse"].map(x=><option key={x}>{x}</option>)}</select></Field><div className="sm:col-span-2"><Field label="Vehicle interested in" required><input className={fieldClass} value={data.desiredVehicle} onChange={e=>set("desiredVehicle",e.target.value)} placeholder="Year, make, model or stock #"/></Field></div><Field label="Budget / target payment"><input className={fieldClass} value={data.budget} onChange={e=>set("budget",e.target.value)}/></Field><Field label="Financing"><select className={fieldClass} value={data.financing} onChange={e=>set("financing",e.target.value)}>{["Undecided","Cash","Needs financing","Pre-approved"].map(x=><option key={x}>{x}</option>)}</select></Field></div>
         </Section>
         <Section number="2" title="Trade-in & follow-up" icon={<Car width={17}/>}>
