@@ -31,6 +31,35 @@ function Brand() {
     <div><div className="text-[13px] font-semibold leading-4">FIRST ROWE AUTO</div><div className="text-[11px] text-ink-3">Repairs & Sales</div></div>
   </a>;
 }
+
+function Hero({onStart}:{onStart:()=>void}) {
+  return <section id="home" className="relative flex min-h-[88vh] w-full items-end overflow-hidden bg-ink text-white">
+    <div
+      className="absolute inset-0 bg-cover bg-center"
+      style={{backgroundImage:"url(https://res.cloudinary.com/dvwtcsh5v/image/upload/v1770400411/img_14002.jpg)",backgroundPosition:"bottom"}}
+    />
+    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-black/10"/>
+    <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-12 pt-28 sm:px-6 sm:pb-16 md:pb-20">
+      <div className="flex flex-col gap-10 md:flex-row md:items-end md:justify-between">
+        <div className="max-w-3xl">
+          <div className="mb-4 text-[12px] font-medium uppercase tracking-[.12em] text-white/70">First Rowe Auto · Hollywood, Florida</div>
+          <h1 className="max-w-3xl text-[42px] font-semibold leading-[.98] tracking-[-.045em] text-white sm:text-[58px] md:text-[76px]">Repair, sales, and service without the runaround.</h1>
+          <p className="mt-5 max-w-2xl text-[16px] leading-7 text-white/85 sm:text-[18px]">Tell us what your vehicle needs before you arrive. We’ll keep the important details clear from intake through pickup—or help you get started on your next vehicle.</p>
+        </div>
+        <div className="shrink-0 md:max-w-[260px]">
+          <div className="mb-5 text-[13px] leading-6 text-white/75">
+            <div>5821 Rodman St, Hollywood, FL</div>
+            <div>Mon–Fri 9–6 · Sat 9–1</div>
+            <div>954-374-8384</div>
+          </div>
+          <Button variant="accent" size="md" onClick={onStart} className="group">
+            Start an intake <ArrowRight width={16} className="transition-transform duration-150 group-hover:translate-x-0.5"/>
+          </Button>
+        </div>
+      </div>
+    </div>
+  </section>;
+}
 function Field({label,required,children,hint}:{label:string;required?:boolean;children:ReactNode;hint?:string}) {
   return <label className="block min-w-0"><span className="mb-1.5 flex items-center gap-1 text-[12px] font-medium text-ink-2">{label}{required&&<span className="text-accent">*</span>}</span>{children}{hint&&<span className="mt-1 block text-[11px] text-ink-3">{hint}</span>}</label>;
 }
@@ -61,17 +90,15 @@ function Onboarding({onDone}:{onDone:()=>void}) {
 }
 
 export default function IntakeApp() {
-  const [onboarded,setOnboarded]=useState<boolean|null>(null);
+  const [showWhy,setShowWhy]=useState(false);
   const [mode,setMode]=useState<Mode>("Repair");
   const [step,setStep]=useState(1);
   const [data,setData]=useState(initial);
   const [recs,setRecs]=useState<Rec[]>([]);
   const [status,setStatus]=useState<"idle"|"sending"|"done"|"error">("idle");
-  useEffect(()=>setOnboarded(localStorage.getItem("rowe-onboarded")==="1"),[]);
   const set=(key:keyof typeof initial,value:any)=>setData(p=>({...p,[key]:value}));
   const ready = useMemo(()=>mode==="Repair" ? !!(data.name&&data.phone&&data.email&&data.referral&&data.year&&data.make&&data.model&&data.mileage&&data.vin.length===17&&data.concern) : !!(data.name&&data.phone&&data.email&&data.desiredVehicle),[data,mode]);
-  if(onboarded===null) return null;
-  if(!onboarded) return <Onboarding onDone={()=>{localStorage.setItem("rowe-onboarded","1");setOnboarded(true)}}/>;
+  if(showWhy) return <Onboarding onDone={()=>setShowWhy(false)}/>;
 
   async function submit(e:FormEvent) {
     e.preventDefault(); setStatus("sending");
@@ -85,8 +112,9 @@ export default function IntakeApp() {
   const toggleService=(s:string)=>set("serviceRequested",data.serviceRequested.includes(s)?data.serviceRequested.filter(x=>x!==s):[...data.serviceRequested,s]);
 
   return <main className="min-h-screen bg-page text-ink">
-    <header className="sticky top-0 z-30 border-b border-line bg-page/95 backdrop-blur"><div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6"><Brand/><div className="flex items-center gap-3"><button className="hidden text-[12px] text-ink-3 hover:text-ink sm:block" onClick={()=>{localStorage.removeItem("rowe-onboarded");setOnboarded(false)}}>Why this intake?</button><ThemeToggle/></div></div></header>
-    <form onSubmit={submit} className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
+    <Hero onStart={()=>document.getElementById("intake")?.scrollIntoView({behavior:"smooth",block:"start"})}/>
+    <header className="sticky top-0 z-30 border-b border-line bg-page/95 backdrop-blur"><div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6"><Brand/><div className="flex items-center gap-3"><button className="hidden text-[12px] text-ink-3 hover:text-ink sm:block" onClick={()=>setShowWhy(true)}>Why this intake?</button><ThemeToggle/></div></div></header>
+    <form id="intake" onSubmit={submit} className="mx-auto max-w-6xl scroll-mt-16 px-4 py-6 sm:px-6 sm:py-8">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div><div className="mb-2 text-[12px] font-medium text-ink-3">NEW INTAKE</div><h1 className="text-[27px] font-semibold tracking-[-.03em]">What are we helping with?</h1><p className="mt-1 text-[13px] text-ink-2">Choose a lane. Only relevant fields appear.</p></div>
         <SegmentedControl options={["Repair","Vehicle sale"] as const} value={mode} onChange={v=>{setMode(v);setStep(1)}} className="w-full sm:w-[260px]"/>
