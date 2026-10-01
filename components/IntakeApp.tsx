@@ -25,10 +25,11 @@ const fieldClass = "h-10 w-full rounded-control border border-line-strong bg-sur
 const areaClass = fieldClass + " min-h-[104px] resize-y py-2.5";
 
 function Brand() {
-  return <div className="flex items-center gap-2.5">
+  const homeHref = process.env.NODE_ENV === "production" ? "/roweautofrontend/" : "/";
+  return <a href={homeHref} aria-label="First Rowe Auto home" className="flex items-center gap-2.5 rounded-control outline-none focus-visible:ring-2 focus-visible:ring-accent">
     <span className="flex size-9 items-center justify-center rounded-control bg-ink text-canvas shadow-btn"><Car width={19}/></span>
     <div><div className="text-[13px] font-semibold leading-4">FIRST ROWE AUTO</div><div className="text-[11px] text-ink-3">Repairs & Sales</div></div>
-  </div>;
+  </a>;
 }
 function Field({label,required,children,hint}:{label:string;required?:boolean;children:ReactNode;hint?:string}) {
   return <label className="block min-w-0"><span className="mb-1.5 flex items-center gap-1 text-[12px] font-medium text-ink-2">{label}{required&&<span className="text-accent">*</span>}</span>{children}{hint&&<span className="mt-1 block text-[11px] text-ink-3">{hint}</span>}</label>;
