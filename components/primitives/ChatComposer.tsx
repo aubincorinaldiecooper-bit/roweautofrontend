@@ -45,12 +45,14 @@ export default function ChatComposer({
   onSend,
   disabled = false,
   suggestions = ["Diagnostic intake", "Estimate follows"],
+  onAttach,
 }: {
   messages: ChatThreadMessage[];
   labels?: Partial<ChatComposerLabels>;
   onSend?: (text: string) => void;
   disabled?: boolean;
   suggestions?: string[];
+  onAttach?: () => void;
 }) {
   const l = { ...DEFAULT_LABELS, ...labels };
   const [draft, setDraft] = useState("");
@@ -82,22 +84,16 @@ export default function ChatComposer({
           ))}
         </div>
         <div className="flex items-center gap-1">
-          {[
-            <path key="p" d="M12 5v14M5 12h14" />,
-            <g key="h"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></g>,
-            <g key="e" fill="currentColor" stroke="none"><circle cx="5" cy="12" r="1.8" /><circle cx="12" cy="12" r="1.8" /><circle cx="19" cy="12" r="1.8" /></g>,
-          ].map((icon, i) => (
-            <button
-              key={i}
-              type="button"
-              aria-label="Action"
-              className="flex size-6 items-center justify-center rounded-[6px] text-ink-3 transition-colors duration-100 hover:bg-hover hover:text-ink-2"
-            >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                {icon}
-              </svg>
-            </button>
-          ))}
+          <button
+            type="button"
+            aria-label="Add diagnostic attachment"
+            onClick={onAttach}
+            className="flex size-6 items-center justify-center rounded-[6px] text-ink-3 transition-colors duration-100 hover:bg-hover hover:text-ink-2"
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+          </button>
         </div>
       </div>
 
