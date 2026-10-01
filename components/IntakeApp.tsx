@@ -190,7 +190,6 @@ export default function IntakeApp() {
                 messages={messages}
                 labels={{placeholder:"Type your answer…"}}
                 onSend={send}
-                onAttach={()=>fileInputRef.current?.click()}
                 disabled={complete}
               />
             </div>
