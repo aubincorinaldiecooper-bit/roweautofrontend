@@ -68,7 +68,7 @@ export default function ChatComposer({
   };
 
   return (
-    <div className="flex h-full min-h-0 w-full max-w-[680px] flex-col self-start overflow-hidden rounded-[14px] bg-surface shadow-card">
+    <div className="flex h-full min-h-0 w-full flex-col self-start overflow-hidden rounded-[14px] bg-surface shadow-card">
       <div className="flex shrink-0 items-center justify-between border-b border-line p-1.5">
         <div className="flex items-center">
           {suggestions.map((item) => (
