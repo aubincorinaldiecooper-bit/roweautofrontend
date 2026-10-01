@@ -1,1 +1,5 @@
-import IntakeApp from "@/components/IntakeApp";\n\nexport default function IntakePage(){ return <IntakeApp/>; }\n
+import IntakeApp from "@/components/IntakeApp";
+
+export default function IntakePage() {
+  return <IntakeApp />;
+}
