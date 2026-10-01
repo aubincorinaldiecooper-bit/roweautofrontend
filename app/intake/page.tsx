@@ -1,0 +1,1 @@
+import IntakeApp from "@/components/IntakeApp";\n\nexport default function IntakePage(){ return <IntakeApp/>; }\n
