@@ -1,6 +1,5 @@
 "use client";
 
-import { useRef } from "react";
 import { Button } from "@/components/atoms/Button";
 import { StatusPill } from "@/components/atoms/StatusPill";
 
@@ -33,15 +32,13 @@ function badgeFor(file:DiagnosticAttachment) {
 
 export default function DiagnosticAttachments({
   files,
-  onAdd,
+  onRequestAdd,
   onRemove,
 }: {
   files: DiagnosticAttachment[];
-  onAdd: (files: FileList) => void;
+  onRequestAdd: () => void;
   onRemove: (id:string) => void;
 }) {
-  const inputRef=useRef<HTMLInputElement>(null);
-
   return (
     <aside className="flex h-full min-h-0 flex-col overflow-hidden rounded-[14px] bg-surface shadow-card">
       <div className="flex shrink-0 items-center justify-between border-b border-line p-3">
@@ -52,20 +49,9 @@ export default function DiagnosticAttachments({
           </div>
           <p className="mt-1 text-[12px] text-ink-3">Photos and documents stay with this intake.</p>
         </div>
-        <Button type="button" variant="secondary" size="xs" onClick={()=>inputRef.current?.click()}>
+        <Button type="button" variant="secondary" size="xs" onClick={onRequestAdd}>
           Add files
         </Button>
-        <input
-          ref={inputRef}
-          className="hidden"
-          type="file"
-          multiple
-          accept="image/*,.pdf,.txt,.doc,.docx"
-          onChange={(event)=>{
-            if(event.target.files?.length) onAdd(event.target.files);
-            event.currentTarget.value="";
-          }}
-        />
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto p-3">
