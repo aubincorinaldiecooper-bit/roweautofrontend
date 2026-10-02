@@ -5,8 +5,16 @@ import { Car } from "iconoir-react";
 import { Button } from "@/components/atoms/Button";
 import { StatusPill } from "@/components/atoms/StatusPill";
 import ChatComposer, { type ChatThreadMessage } from "@/components/primitives/ChatComposer";
-import DiagnosticAttachments, { type DiagnosticAttachment } from "@/components/primitives/DiagnosticAttachments";
+import ContextCards, { type ContextChunk } from "@/components/primitives/ContextCards";
 import { ThemeToggle } from "@/components/site/ThemeToggle";
+
+type DiagnosticAttachment = {
+  id: string;
+  name: string;
+  type: string;
+  size: number;
+  preview?: string;
+};
 
 type IntakeData = {
   name: string;
@@ -66,6 +74,22 @@ export default function IntakeApp() {
   const nextId=useRef(2);
 
   const currentStep=order[stepIndex];
+  const diagnosticChunks:ContextChunk[]=attachments.map((file)=>({
+    title:file.name,
+    chars:file.size < 1024
+      ? `${file.size} B`
+      : file.size < 1024*1024
+        ? `${Math.round(file.size/1024)} KB`
+        : `${(file.size/(1024*1024)).toFixed(1)} MB`,
+    body:file.type.startsWith("image/")
+      ? "Photo"
+      : file.type.startsWith("video/")
+        ? "Video"
+        : "Document",
+    source:"Diagnostic upload",
+    badge:file.type.startsWith("image/") ? "IMG" : file.type.startsWith("video/") ? "VID" : "FILE",
+    tone:"bg-accent",
+  }));
 
   async function finish(nextData:IntakeData) {
     setComplete(true);
@@ -233,15 +257,25 @@ export default function IntakeApp() {
             )}
           </div>
 
-          <div className="hidden min-h-0 lg:block">
-            <DiagnosticAttachments
-              files={attachments}
-              onRequestAdd={()=>fileInputRef.current?.click()}
-              onRequestPhoto={()=>photoInputRef.current?.click()}
-              onRequestVideo={()=>videoInputRef.current?.click()}
-              onRemove={(id)=>setAttachments(current=>current.filter(file=>file.id!==id))}
-            />
-          </div>
+          <aside className="hidden min-h-0 lg:flex lg:flex-col">
+            <div className="mb-2 flex shrink-0 flex-wrap items-center gap-1.5">
+              <Button type="button" variant="secondary" size="xs" onClick={()=>photoInputRef.current?.click()}>
+                Take photo
+              </Button>
+              <Button type="button" variant="secondary" size="xs" onClick={()=>videoInputRef.current?.click()}>
+                Record video
+              </Button>
+              <Button type="button" variant="secondary" size="xs" onClick={()=>fileInputRef.current?.click()}>
+                Add files
+              </Button>
+            </div>
+            <div className="min-h-0 flex-1 overflow-y-auto">
+              <ContextCards
+                chunks={diagnosticChunks}
+                labels={{header:"Diagnostic files",count:String(attachments.length)}}
+              />
+            </div>
+          </aside>
         </div>
       </section>
     </main>
