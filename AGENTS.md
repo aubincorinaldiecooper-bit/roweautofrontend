@@ -25,4 +25,5 @@ Pinned reference:
 - Theme control: Beautiful UI ThemeToggle
 - Intake conversation: Beautiful UI ChatComposer adaptation
 - Diagnostic attachments: Beautiful UI ContextCards adaptation
+- Confirmation lookup: Beautiful UI SearchList + TaskRows adaptation
 - Intake completion action: Beautiful UI Button
