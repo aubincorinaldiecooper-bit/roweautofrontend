@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { ArrowRight, Car } from "iconoir-react";
 import { Button } from "@/components/atoms/Button";
 import { StatusPill } from "@/components/atoms/StatusPill";
@@ -12,7 +13,7 @@ function basePath(path:string) {
 }
 
 export default function HomePage() {
-  const [showTracker,setShowTracker]=require("react").useState(false);
+  const [showTracker,setShowTracker]=useState(false);
   return (
     <main className="min-h-screen bg-page text-ink">
       <section className="relative flex min-h-screen w-full items-end overflow-hidden bg-ink text-white">
