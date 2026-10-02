@@ -59,6 +59,8 @@ export default function IntakeApp() {
   const [emailState,setEmailState]=useState<"idle"|"sending"|"sent"|"unavailable">("idle");
   const [attachments,setAttachments]=useState<DiagnosticAttachment[]>([]);
   const fileInputRef=useRef<HTMLInputElement>(null);
+  const photoInputRef=useRef<HTMLInputElement>(null);
+  const videoInputRef=useRef<HTMLInputElement>(null);
   const nextId=useRef(2);
 
   const currentStep=order[stepIndex];
@@ -136,7 +138,7 @@ export default function IntakeApp() {
         size:file.size,
       };
 
-      if(file.type.startsWith("image/")){
+      if(file.type.startsWith("image/") || file.type.startsWith("video/")){
         const reader=new FileReader();
         reader.onload=()=>{
           setAttachments(current=>[
@@ -176,7 +178,29 @@ export default function IntakeApp() {
           className="hidden"
           type="file"
           multiple
-          accept="image/*,.pdf,.txt,.doc,.docx"
+          accept="image/*,video/*,.pdf,.txt,.doc,.docx"
+          onChange={(event)=>{
+            if(event.target.files?.length) addFiles(event.target.files);
+            event.currentTarget.value="";
+          }}
+        />
+        <input
+          ref={photoInputRef}
+          className="hidden"
+          type="file"
+          accept="image/*"
+          capture="environment"
+          onChange={(event)=>{
+            if(event.target.files?.length) addFiles(event.target.files);
+            event.currentTarget.value="";
+          }}
+        />
+        <input
+          ref={videoInputRef}
+          className="hidden"
+          type="file"
+          accept="video/*"
+          capture="environment"
           onChange={(event)=>{
             if(event.target.files?.length) addFiles(event.target.files);
             event.currentTarget.value="";
@@ -212,6 +236,8 @@ export default function IntakeApp() {
             <DiagnosticAttachments
               files={attachments}
               onRequestAdd={()=>fileInputRef.current?.click()}
+              onRequestPhoto={()=>photoInputRef.current?.click()}
+              onRequestVideo={()=>videoInputRef.current?.click()}
               onRemove={(id)=>setAttachments(current=>current.filter(file=>file.id!==id))}
             />
           </div>
