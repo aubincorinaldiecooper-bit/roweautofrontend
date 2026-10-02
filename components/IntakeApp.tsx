@@ -1,10 +1,9 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { FormEvent, useRef, useState } from "react";
 import { Car } from "iconoir-react";
 import { Button } from "@/components/atoms/Button";
 import { StatusPill } from "@/components/atoms/StatusPill";
-import ChatComposer, { type ChatThreadMessage } from "@/components/primitives/ChatComposer";
 import ContextCards, { type ContextChunk } from "@/components/primitives/ContextCards";
 import { ThemeToggle } from "@/components/site/ThemeToggle";
 
@@ -13,7 +12,6 @@ type DiagnosticAttachment = {
   name: string;
   type: string;
   size: number;
-  preview?: string;
 };
 
 type IntakeData = {
@@ -25,6 +23,12 @@ type IntakeData = {
   vin: string;
   concern: string;
   symptoms: string;
+};
+
+type Message = {
+  id: number;
+  role: "assistant" | "user";
+  text: string;
 };
 
 const order: (keyof IntakeData)[] = ["name","email","phone","vehicle","mileage","vin","concern","symptoms"];
@@ -60,20 +64,20 @@ const emptyData:IntakeData = {name:"",email:"",phone:"",vehicle:"",mileage:"",vi
 
 export default function IntakeApp() {
   const [stepIndex,setStepIndex]=useState(0);
+  const [draft,setDraft]=useState("");
   const [data,setData]=useState<IntakeData>(emptyData);
-  const [messages,setMessages]=useState<ChatThreadMessage[]>([
+  const [messages,setMessages]=useState<Message[]>([
     {id:1,role:"assistant",text:questions.name}
   ]);
   const [complete,setComplete]=useState(false);
-  const [emailState,setEmailState]=useState<"idle"|"sending"|"sent"|"unavailable">("idle");
   const [confirmationNumber,setConfirmationNumber]=useState("");
   const [attachments,setAttachments]=useState<DiagnosticAttachment[]>([]);
   const fileInputRef=useRef<HTMLInputElement>(null);
   const photoInputRef=useRef<HTMLInputElement>(null);
   const videoInputRef=useRef<HTMLInputElement>(null);
   const nextId=useRef(2);
-
   const currentStep=order[stepIndex];
+
   const diagnosticChunks:ContextChunk[]=attachments.map((file)=>({
     title:file.name,
     chars:file.size < 1024
@@ -98,17 +102,13 @@ export default function IntakeApp() {
       {
         id:nextId.current++,
         role:"assistant",
-        text:"Thanks — I’ve got what we need for the initial diagnostic intake. We’ll review the details and follow up with an estimate shortly."
+        text:"Thanks — I’ve got what we need. We’ll get in touch."
       }
     ]);
 
     const api=process.env.NEXT_PUBLIC_API_URL;
-    if(!api){
-      setEmailState("unavailable");
-      return;
-    }
+    if(!api) return;
 
-    setEmailState("sending");
     try{
       const res=await fetch(`${api}/api/intake-chat/complete`,{
         method:"POST",
@@ -118,19 +118,17 @@ export default function IntakeApp() {
           attachments:attachments.map(({name,type,size})=>({name,type,size}))
         })
       });
-      if(!res.ok) throw new Error("send failed");
+      if(!res.ok) return;
       const result=await res.json();
-      setEmailState(result.email_sent ? "sent" : "unavailable");
       setConfirmationNumber(result.confirmation_number || "");
-    }catch{
-      setEmailState("unavailable");
-    }
+    }catch{}
   }
 
-  function send(text:string) {
+  function submitAnswer(event:FormEvent) {
+    event.preventDefault();
     if(complete) return;
 
-    const value=text.trim();
+    const value=draft.trim();
     if(!value) return;
 
     const normalized=currentStep==="vin" && value.toLowerCase()==="skip" ? "" : value;
@@ -140,6 +138,7 @@ export default function IntakeApp() {
       ...current,
       {id:nextId.current++,role:"user",text:value}
     ]);
+    setDraft("");
 
     if(stepIndex===order.length-1){
       void finish(nextData);
@@ -157,35 +156,21 @@ export default function IntakeApp() {
   }
 
   function addFiles(files:FileList) {
-    Array.from(files).forEach((file,index)=>{
-      const base:DiagnosticAttachment={
-        id:`${Date.now()}-${index}-${file.name}`,
-        name:file.name,
-        type:file.type || "application/octet-stream",
-        size:file.size,
-      };
-
-      if(file.type.startsWith("image/") || file.type.startsWith("video/")){
-        const reader=new FileReader();
-        reader.onload=()=>{
-          setAttachments(current=>[
-            ...current,
-            {...base,preview:typeof reader.result==="string" ? reader.result : undefined}
-          ]);
-        };
-        reader.readAsDataURL(file);
-      }else{
-        setAttachments(current=>[...current,base]);
-      }
-    });
+    const next=Array.from(files).map((file,index)=>({
+      id:`${Date.now()}-${index}-${file.name}`,
+      name:file.name,
+      type:file.type || "application/octet-stream",
+      size:file.size,
+    }));
+    setAttachments(current=>[...current,...next]);
   }
 
   function reset() {
     setStepIndex(0);
+    setDraft("");
     setData(emptyData);
     setMessages([{id:1,role:"assistant",text:questions.name}]);
     setComplete(false);
-    setEmailState("idle");
     setConfirmationNumber("");
     setAttachments([]);
     nextId.current=2;
@@ -200,7 +185,7 @@ export default function IntakeApp() {
         </div>
       </header>
 
-      <section className="mx-auto flex h-[calc(100dvh-64px)] max-w-[1280px] flex-col overflow-hidden px-4 py-5 sm:px-6 sm:py-6">
+      <section className="mx-auto grid h-[calc(100dvh-64px)] max-w-[1280px] min-h-0 gap-4 overflow-hidden px-4 py-5 sm:px-6 sm:py-6 lg:grid-cols-[minmax(0,1fr)_340px]">
         <input
           ref={fileInputRef}
           className="hidden"
@@ -235,19 +220,43 @@ export default function IntakeApp() {
           }}
         />
 
-        <div className="grid min-h-0 w-full flex-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
-          <div className="flex min-h-0 min-w-0 flex-col">
-            <div className="min-h-0 flex-1">
-              <ChatComposer
-                messages={messages}
-                labels={{placeholder:"Type your answer…"}}
-                onSend={send}
-                disabled={complete}
-              />
+        <div className="flex min-h-0 min-w-0 flex-col">
+          <div className="min-h-0 flex-1 overflow-y-auto px-1 py-1">
+            <div className="mx-auto flex max-w-[720px] flex-col gap-5 py-3">
+              {messages.map((message)=>(
+                <div key={message.id} className={message.role==="user" ? "text-right" : "text-left"}>
+                  {message.role==="assistant" && (
+                    <div className="mb-1 text-[12px] font-medium text-ink-2">First Rowe Auto</div>
+                  )}
+                  <p className={message.role==="user"
+                    ? "ml-auto max-w-[620px] text-[13px] leading-6 text-ink"
+                    : "max-w-[620px] text-[13px] leading-6 text-ink"}>
+                    {message.text}
+                  </p>
+                </div>
+              ))}
             </div>
+          </div>
 
-            {complete && (
-              <div className="mt-3 flex shrink-0 items-center justify-between gap-4">
+          <div className="shrink-0 pt-3">
+            {!complete ? (
+              <form onSubmit={submitAnswer} className="mx-auto flex max-w-[720px] items-center gap-2">
+                <div className="flex h-10 flex-1 items-center rounded-control bg-inset px-3 shadow-hairline transition-shadow duration-150 focus-within:shadow-btn">
+                  <input
+                    value={draft}
+                    onChange={(event)=>setDraft(event.target.value)}
+                    placeholder="Type your answer…"
+                    aria-label="Type your answer"
+                    className="min-w-0 flex-1 bg-transparent text-[13px] text-ink outline-none placeholder:text-ink-3"
+                    autoFocus
+                  />
+                </div>
+                <Button type="submit" variant="primary" size="md" disabled={!draft.trim()}>
+                  Send
+                </Button>
+              </form>
+            ) : (
+              <div className="mx-auto flex max-w-[720px] items-center justify-between gap-3">
                 <div className="flex items-center gap-2" style={{animation:"pop-in 260ms cubic-bezier(0.23,1,0.32,1) both"}}>
                   <StatusPill tone="green" dot={false}>We’ll get in touch</StatusPill>
                   {confirmationNumber && <span className="font-mono text-[11.5px] text-ink-3">{confirmationNumber}</span>}
@@ -256,27 +265,27 @@ export default function IntakeApp() {
               </div>
             )}
           </div>
-
-          <aside className="hidden min-h-0 lg:flex lg:flex-col">
-            <div className="mb-2 flex shrink-0 flex-wrap items-center gap-1.5">
-              <Button type="button" variant="secondary" size="xs" onClick={()=>photoInputRef.current?.click()}>
-                Take photo
-              </Button>
-              <Button type="button" variant="secondary" size="xs" onClick={()=>videoInputRef.current?.click()}>
-                Record video
-              </Button>
-              <Button type="button" variant="secondary" size="xs" onClick={()=>fileInputRef.current?.click()}>
-                Add files
-              </Button>
-            </div>
-            <div className="min-h-0 flex-1 overflow-y-auto">
-              <ContextCards
-                chunks={diagnosticChunks}
-                labels={{header:"Diagnostic files",count:String(attachments.length)}}
-              />
-            </div>
-          </aside>
         </div>
+
+        <aside className="hidden min-h-0 lg:flex lg:flex-col">
+          <div className="mb-2 flex shrink-0 flex-wrap items-center gap-1.5">
+            <Button type="button" variant="secondary" size="xs" onClick={()=>photoInputRef.current?.click()}>
+              Take photo
+            </Button>
+            <Button type="button" variant="secondary" size="xs" onClick={()=>videoInputRef.current?.click()}>
+              Record video
+            </Button>
+            <Button type="button" variant="secondary" size="xs" onClick={()=>fileInputRef.current?.click()}>
+              Add files
+            </Button>
+          </div>
+          <div className="min-h-0 flex-1 overflow-y-auto">
+            <ContextCards
+              chunks={diagnosticChunks}
+              labels={{header:"Diagnostic files",count:String(attachments.length)}}
+            />
+          </div>
+        </aside>
       </section>
     </main>
   );
