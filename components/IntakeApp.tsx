@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { Car } from "iconoir-react";
 import { Button } from "@/components/atoms/Button";
+import { StatusPill } from "@/components/atoms/StatusPill";
 import ChatComposer, { type ChatThreadMessage } from "@/components/primitives/ChatComposer";
 import DiagnosticAttachments, { type DiagnosticAttachment } from "@/components/primitives/DiagnosticAttachments";
 import { ThemeToggle } from "@/components/site/ThemeToggle";
@@ -220,12 +221,8 @@ export default function IntakeApp() {
 
             {complete && (
               <div className="mt-3 flex shrink-0 items-center justify-between gap-4">
-                <div className="text-[12px] text-ink-2">
-                  {emailState==="sent"
-                    ? "Confirmation email sent. We’ll follow up with the estimate shortly."
-                    : emailState==="sending"
-                      ? "Sending confirmation email…"
-                      : "We’ll follow up with the estimate shortly."}
+                <div style={{animation:"pop-in 260ms cubic-bezier(0.23,1,0.32,1) both"}}>
+                  <StatusPill tone="green" dot={false}>We’ll get in touch</StatusPill>
                 </div>
                 <Button variant="secondary" size="sm" onClick={reset}>Start another intake</Button>
               </div>
