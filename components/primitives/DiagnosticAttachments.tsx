@@ -26,6 +26,7 @@ function formatBytes(bytes:number) {
 
 function badgeFor(file:DiagnosticAttachment) {
   if(file.type.startsWith("image/")) return "IMG";
+  if(file.type.startsWith("video/")) return "VID";
   if(file.type.includes("pdf")) return "PDF";
   return "FILE";
 }
@@ -33,10 +34,14 @@ function badgeFor(file:DiagnosticAttachment) {
 export default function DiagnosticAttachments({
   files,
   onRequestAdd,
+  onRequestPhoto,
+  onRequestVideo,
   onRemove,
 }: {
   files: DiagnosticAttachment[];
   onRequestAdd: () => void;
+  onRequestPhoto: () => void;
+  onRequestVideo: () => void;
   onRemove: (id:string) => void;
 }) {
   return (
@@ -49,9 +54,17 @@ export default function DiagnosticAttachments({
           </div>
           <p className="mt-1 text-[12px] text-ink-3">Photos and documents stay with this intake.</p>
         </div>
-        <Button type="button" variant="secondary" size="xs" onClick={onRequestAdd}>
-          Add files
-        </Button>
+        <div className="flex items-center gap-1.5">
+          <Button type="button" variant="secondary" size="xs" onClick={onRequestPhoto}>
+            Take photo
+          </Button>
+          <Button type="button" variant="secondary" size="xs" onClick={onRequestVideo}>
+            Record video
+          </Button>
+          <Button type="button" variant="secondary" size="xs" onClick={onRequestAdd}>
+            Add files
+          </Button>
+        </div>
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto p-3">
@@ -75,9 +88,14 @@ export default function DiagnosticAttachments({
                 className="overflow-hidden rounded-card bg-surface shadow-card"
                 style={{animation:`fade-up 400ms cubic-bezier(0.23,1,0.32,1) ${index*70}ms both`}}
               >
-                {file.preview && (
+                {file.preview && file.type.startsWith("image/") && (
                   <div className="aspect-[16/10] w-full overflow-hidden bg-inset">
                     <img src={file.preview} alt="" className="h-full w-full object-cover"/>
+                  </div>
+                )}
+                {file.preview && file.type.startsWith("video/") && (
+                  <div className="aspect-[16/10] w-full overflow-hidden bg-inset">
+                    <video src={file.preview} controls className="h-full w-full object-cover"/>
                   </div>
                 )}
                 <div className="primitive-card-bar flex items-center gap-2.5 border-b border-line">
