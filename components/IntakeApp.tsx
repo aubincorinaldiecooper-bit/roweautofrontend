@@ -1,10 +1,11 @@
 "use client";
 
-import { FormEvent, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Car } from "iconoir-react";
 import { Button } from "@/components/atoms/Button";
 import { StatusPill } from "@/components/atoms/StatusPill";
 import ContextCards, { type ContextChunk } from "@/components/primitives/ContextCards";
+import ChatComposer from "@/components/primitives/ChatComposer";
 import { ThemeToggle } from "@/components/site/ThemeToggle";
 
 type DiagnosticAttachment = {
@@ -64,7 +65,6 @@ const emptyData:IntakeData = {name:"",email:"",phone:"",vehicle:"",mileage:"",vi
 
 export default function IntakeApp() {
   const [stepIndex,setStepIndex]=useState(0);
-  const [draft,setDraft]=useState("");
   const [data,setData]=useState<IntakeData>(emptyData);
   const [messages,setMessages]=useState<Message[]>([
     {id:1,role:"assistant",text:questions.name}
@@ -124,11 +124,10 @@ export default function IntakeApp() {
     }catch{}
   }
 
-  function submitAnswer(event:FormEvent) {
-    event.preventDefault();
+  function submitAnswer(text:string) {
     if(complete) return;
 
-    const value=draft.trim();
+    const value=text.trim();
     if(!value) return;
 
     const normalized=currentStep==="vin" && value.toLowerCase()==="skip" ? "" : value;
@@ -138,7 +137,6 @@ export default function IntakeApp() {
       ...current,
       {id:nextId.current++,role:"user",text:value}
     ]);
-    setDraft("");
 
     if(stepIndex===order.length-1){
       void finish(nextData);
@@ -167,7 +165,6 @@ export default function IntakeApp() {
 
   function reset() {
     setStepIndex(0);
-    setDraft("");
     setData(emptyData);
     setMessages([{id:1,role:"assistant",text:questions.name}]);
     setComplete(false);
@@ -240,21 +237,14 @@ export default function IntakeApp() {
 
           <div className="shrink-0 pt-3">
             {!complete ? (
-              <form onSubmit={submitAnswer} className="mx-auto flex max-w-[720px] items-center gap-2">
-                <div className="flex h-10 flex-1 items-center rounded-control bg-inset px-3 shadow-hairline transition-shadow duration-150 focus-within:shadow-btn">
-                  <input
-                    value={draft}
-                    onChange={(event)=>setDraft(event.target.value)}
-                    placeholder="Type your answer…"
-                    aria-label="Type your answer"
-                    className="min-w-0 flex-1 bg-transparent text-[13px] text-ink outline-none placeholder:text-ink-3"
-                    autoFocus
-                  />
-                </div>
-                <Button type="submit" variant="primary" size="md" disabled={!draft.trim()}>
-                  Send
-                </Button>
-              </form>
+              <div className="mx-auto max-w-[720px] [&>div]:!h-auto [&>div]:!max-w-none [&>div]:!overflow-visible [&>div]:!rounded-none [&>div]:!bg-transparent [&>div]:!shadow-none [&>div>div:first-child]:hidden [&>div>div:nth-child(2)]:hidden">
+                <ChatComposer
+                  messages={[]}
+                  suggestions={[]}
+                  labels={{initialPrompt:"",placeholder:"Type your answer…"}}
+                  onSend={submitAnswer}
+                />
+              </div>
             ) : (
               <div className="mx-auto flex max-w-[720px] items-center justify-between gap-3">
                 <div className="flex items-center gap-2" style={{animation:"pop-in 260ms cubic-bezier(0.23,1,0.32,1) both"}}>
