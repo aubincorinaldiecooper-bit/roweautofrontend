@@ -4,6 +4,7 @@ import { ArrowRight, Car } from "iconoir-react";
 import { Button } from "@/components/atoms/Button";
 import { StatusPill } from "@/components/atoms/StatusPill";
 import { ThemeToggle } from "@/components/site/ThemeToggle";
+import ConfirmationTracker from "@/components/primitives/ConfirmationTracker";
 
 function basePath(path:string) {
   const base = process.env.NODE_ENV === "production" ? "/roweautofrontend" : "";
@@ -11,6 +12,7 @@ function basePath(path:string) {
 }
 
 export default function HomePage() {
+  const [showTracker,setShowTracker]=require("react").useState(false);
   return (
     <main className="min-h-screen bg-page text-ink">
       <section className="relative flex min-h-screen w-full items-end overflow-hidden bg-ink text-white">
@@ -67,8 +69,21 @@ export default function HomePage() {
               >
                 Start intake <ArrowRight width={16}/>
               </Button>
+              <Button
+                variant="secondary"
+                size="md"
+                onClick={() => setShowTracker(current=>!current)}
+              >
+                Check confirmation #
+              </Button>
               <span className="text-[12px] text-white/65">5821 Rodman St · Hollywood, FL · 954-374-8384</span>
             </div>
+
+            {showTracker && (
+              <div className="mt-4" style={{animation:"fade-up 300ms cubic-bezier(0.23,1,0.32,1) both"}}>
+                <ConfirmationTracker/>
+              </div>
+            )}
           </div>
         </div>
       </section>
