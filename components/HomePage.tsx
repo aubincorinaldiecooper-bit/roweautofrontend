@@ -1,19 +1,75 @@
 "use client";
 
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 import { ArrowRight, Car } from "iconoir-react";
 import { Button } from "@/components/atoms/Button";
 import { StatusPill } from "@/components/atoms/StatusPill";
+import TaskRows, { type TaskRow } from "@/components/primitives/TaskRows";
 import { ThemeToggle } from "@/components/site/ThemeToggle";
-import ConfirmationTracker from "@/components/primitives/ConfirmationTracker";
+
+type TrackerUpdate = {
+  title: string;
+  detail?: string | null;
+  created_at: string;
+};
+
+type TrackerResult = {
+  confirmation_number: string;
+  vehicle?: string | null;
+  current_status: string;
+  updates: TrackerUpdate[];
+};
 
 function basePath(path:string) {
   const base = process.env.NODE_ENV === "production" ? "/roweautofrontend" : "";
   return `${base}${path}`;
 }
 
+function shortDate(value:string) {
+  const date=new Date(value);
+  if(Number.isNaN(date.getTime())) return "";
+  return date.toLocaleDateString(undefined,{month:"short",day:"numeric"});
+}
+
 export default function HomePage() {
   const [showTracker,setShowTracker]=useState(false);
+  const [confirmation,setConfirmation]=useState("");
+  const [tracker,setTracker]=useState<TrackerResult|null>(null);
+  const [trackerState,setTrackerState]=useState<"idle"|"loading"|"error">("idle");
+
+  async function checkConfirmation(event:FormEvent) {
+    event.preventDefault();
+    const value=confirmation.trim().toUpperCase();
+    if(!value) return;
+
+    const api=process.env.NEXT_PUBLIC_API_URL;
+    if(!api){
+      setTracker(null);
+      setTrackerState("error");
+      return;
+    }
+
+    setTrackerState("loading");
+    setTracker(null);
+
+    try{
+      const response=await fetch(`${api}/api/status/${encodeURIComponent(value)}`);
+      if(!response.ok) throw new Error("not found");
+      setTracker(await response.json());
+      setTrackerState("idle");
+    }catch{
+      setTrackerState("error");
+    }
+  }
+
+  const trackerRows:TaskRow[]=(tracker?.updates ?? []).map((update,index)=>({
+    key:`${update.created_at}-${index}`,
+    label:update.title,
+    amount:shortDate(update.created_at),
+    status:"done",
+    details:update.detail ? [{label:update.detail,meta:""}] : [],
+  }));
+
   return (
     <main className="min-h-screen bg-page text-ink">
       <section className="relative flex min-h-screen w-full items-end overflow-hidden bg-ink text-white">
@@ -81,8 +137,45 @@ export default function HomePage() {
             </div>
 
             {showTracker && (
-              <div className="mt-4" style={{animation:"fade-up 300ms cubic-bezier(0.23,1,0.32,1) both"}}>
-                <ConfirmationTracker/>
+              <div className="mt-4 max-w-md" style={{animation:"fade-up 300ms cubic-bezier(0.23,1,0.32,1) both"}}>
+                <form onSubmit={checkConfirmation} className="flex items-center gap-2">
+                  <div className="flex h-10 flex-1 items-center rounded-control bg-surface px-3 text-ink shadow-btn transition-shadow duration-150 focus-within:shadow-raised">
+                    <input
+                      value={confirmation}
+                      onChange={(event)=>{
+                        setConfirmation(event.target.value.toUpperCase());
+                        if(trackerState==="error") setTrackerState("idle");
+                      }}
+                      placeholder="Confirmation #"
+                      aria-label="Confirmation number"
+                      className="min-w-0 flex-1 bg-transparent text-[13px] text-ink outline-none placeholder:text-ink-3"
+                    />
+                  </div>
+                  <Button type="submit" variant="primary" size="md" disabled={!confirmation.trim()||trackerState==="loading"}>
+                    {trackerState==="loading" ? "Checking…" : "Check"}
+                  </Button>
+                </form>
+
+                {trackerState==="error" && (
+                  <p className="mt-2 text-[12px] text-white/75">We couldn’t find that confirmation number.</p>
+                )}
+
+                {tracker && (
+                  <div className="mt-3">
+                    <div className="mb-2 flex items-center justify-between gap-3">
+                      <div>
+                        <div className="font-mono text-[11.5px] text-white/65">{tracker.confirmation_number}</div>
+                        {tracker.vehicle && <div className="mt-0.5 text-[13px] font-medium text-white">{tracker.vehicle}</div>}
+                      </div>
+                      <StatusPill tone="accent" dot={false}>{tracker.current_status}</StatusPill>
+                    </div>
+                    <TaskRows
+                      variant="List"
+                      rows={trackerRows}
+                      labels={{completed:"Update",failed:"Issue"}}
+                    />
+                  </div>
+                )}
               </div>
             )}
           </div>
