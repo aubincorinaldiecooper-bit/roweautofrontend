@@ -24,6 +24,14 @@ Pinned reference:
 - Home status labels: Beautiful UI StatusPill
 - Theme control: Beautiful UI ThemeToggle
 - Intake conversation: Beautiful UI ChatComposer adaptation
-- Diagnostic attachments: Beautiful UI ContextCards adaptation
+- Diagnostic attachments: upstream Beautiful UI ContextCards verbatim + upstream Beautiful UI Button
 - Confirmation lookup: Beautiful UI SearchList + TaskRows adaptation
 - Intake completion action: Beautiful UI Button
+
+
+## Diagnostic panel hard rule
+
+- The diagnostic attachment panel must not define its own card, panel, badge, or control system.
+- Use the upstream Beautiful UI ContextCards primitive verbatim for attachment presentation.
+- Use the upstream Beautiful UI Button primitive for Take photo, Record video, and Add files.
+- Semantic wrappers may only arrange those upstream primitives; they must not recreate a visual component.
