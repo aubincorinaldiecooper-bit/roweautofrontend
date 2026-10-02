@@ -58,6 +58,7 @@ export default function IntakeApp() {
   ]);
   const [complete,setComplete]=useState(false);
   const [emailState,setEmailState]=useState<"idle"|"sending"|"sent"|"unavailable">("idle");
+  const [confirmationNumber,setConfirmationNumber]=useState("");
   const [attachments,setAttachments]=useState<DiagnosticAttachment[]>([]);
   const fileInputRef=useRef<HTMLInputElement>(null);
   const photoInputRef=useRef<HTMLInputElement>(null);
@@ -96,6 +97,7 @@ export default function IntakeApp() {
       if(!res.ok) throw new Error("send failed");
       const result=await res.json();
       setEmailState(result.email_sent ? "sent" : "unavailable");
+      setConfirmationNumber(result.confirmation_number || "");
     }catch{
       setEmailState("unavailable");
     }
@@ -160,6 +162,7 @@ export default function IntakeApp() {
     setMessages([{id:1,role:"assistant",text:questions.name}]);
     setComplete(false);
     setEmailState("idle");
+    setConfirmationNumber("");
     setAttachments([]);
     nextId.current=2;
   }
@@ -221,8 +224,9 @@ export default function IntakeApp() {
 
             {complete && (
               <div className="mt-3 flex shrink-0 items-center justify-between gap-4">
-                <div style={{animation:"pop-in 260ms cubic-bezier(0.23,1,0.32,1) both"}}>
+                <div className="flex items-center gap-2" style={{animation:"pop-in 260ms cubic-bezier(0.23,1,0.32,1) both"}}>
                   <StatusPill tone="green" dot={false}>We’ll get in touch</StatusPill>
+                  {confirmationNumber && <span className="font-mono text-[11.5px] text-ink-3">{confirmationNumber}</span>}
                 </div>
                 <Button variant="secondary" size="sm" onClick={reset}>Start another intake</Button>
               </div>
