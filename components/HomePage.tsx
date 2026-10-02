@@ -1,10 +1,11 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { useState } from "react";
 import { ArrowRight, Car } from "iconoir-react";
 import { Button } from "@/components/atoms/Button";
 import { StatusPill } from "@/components/atoms/StatusPill";
 import TaskRows, { type TaskRow } from "@/components/primitives/TaskRows";
+import ChatComposer from "@/components/primitives/ChatComposer";
 import { ThemeToggle } from "@/components/site/ThemeToggle";
 
 type TrackerUpdate = {
@@ -37,9 +38,9 @@ export default function HomePage() {
   const [tracker,setTracker]=useState<TrackerResult|null>(null);
   const [trackerState,setTrackerState]=useState<"idle"|"loading"|"error">("idle");
 
-  async function checkConfirmation(event:FormEvent) {
-    event.preventDefault();
-    const value=confirmation.trim().toUpperCase();
+  async function checkConfirmation(text:string) {
+    const value=text.trim().toUpperCase();
+    setConfirmation(value);
     if(!value) return;
 
     const api=process.env.NEXT_PUBLIC_API_URL;
@@ -138,23 +139,14 @@ export default function HomePage() {
 
             {showTracker && (
               <div className="mt-4 max-w-md" style={{animation:"fade-up 300ms cubic-bezier(0.23,1,0.32,1) both"}}>
-                <form onSubmit={checkConfirmation} className="flex items-center gap-2">
-                  <div className="flex h-10 flex-1 items-center rounded-control bg-surface px-3 text-ink shadow-btn transition-shadow duration-150 focus-within:shadow-raised">
-                    <input
-                      value={confirmation}
-                      onChange={(event)=>{
-                        setConfirmation(event.target.value.toUpperCase());
-                        if(trackerState==="error") setTrackerState("idle");
-                      }}
-                      placeholder="Confirmation #"
-                      aria-label="Confirmation number"
-                      className="min-w-0 flex-1 bg-transparent text-[13px] text-ink outline-none placeholder:text-ink-3"
-                    />
-                  </div>
-                  <Button type="submit" variant="primary" size="md" disabled={!confirmation.trim()||trackerState==="loading"}>
-                    {trackerState==="loading" ? "Checking…" : "Check"}
-                  </Button>
-                </form>
+                <div className="[&>div]:!h-auto [&>div]:!max-w-none [&>div]:!overflow-visible [&>div]:!rounded-none [&>div]:!bg-transparent [&>div]:!shadow-none [&>div>div:first-child]:hidden [&>div>div:nth-child(2)]:hidden">
+                  <ChatComposer
+                    messages={[]}
+                    suggestions={[]}
+                    labels={{initialPrompt:"",placeholder:trackerState==="loading" ? "Checking…" : "Confirmation #"}}
+                    onSend={checkConfirmation}
+                  />
+                </div>
 
                 {trackerState==="error" && (
                   <p className="mt-2 text-[12px] text-white/75">We couldn’t find that confirmation number.</p>
